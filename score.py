@@ -1,5 +1,6 @@
 import numpy as np
 import cv2
+# import statistics as st
 
 class ImageDivider():
 
@@ -35,13 +36,46 @@ class ImageDivider():
         numberFeatures = [len(kp) for kp in kps]
         return imgBrisk, numberFeatures
     
-    def FeatureDensity(self, height, width, numberFeatues):
+    def FeatureDensity(self, height, width, numberFeatures):
         area = height*width
-        density = [nF/area for nF in numberFeatues]
-        density = sum(density)/len(density)
-        return density
+        density = [nF/area for nF in numberFeatures]
+        # density = sum(density)/len(density)
+        densityMean = np.mean(density)
+        densityStd = np.std(density)
+        return densityMean, densityStd
+    
+    def FeatureStatistic(self, numberFeatures):
+        # featureMean = np.mean(numberFeatures)
+        norm = np.linalg.norm(numberFeatures)
+        numberFeatures = numberFeatures/norm
+        featureStd = np.std(numberFeatures)
+        return featureStd
 
+    def Score(self, stdRef, stdValue, nFeatureRef, nFeature, contrastRef, contrastValue):
+        #Distribuicao de Features
+        distribution = stdRef/stdValue
+        limit = lambda n, minn, maxn: max(min(maxn, n), minn)
+        distribution = limit(distribution, 0, 1)
 
+        #Numero de Features 
+        qtd = nFeature/nFeatureRef
+        qtd = limit(qtd, 0, 1)
+
+        #contraste
+        contrast = contrastValue/contrastRef
+        contrast = limit(contrast, 0, 1)
+
+        print("distribution", distribution)
+        print("qtd", qtd)
+
+    def RMSContrast(self, img):
+        stdImg = np.std(img)
+        return stdImg
+    
+    def MichContrast(self, img):
+        print(np.max(img), np.min(img))
+        contrast = (np.max(img)-np.min(img))/(np.max(img)+np.min(img))
+        print(contrast)
 
 
 def main():

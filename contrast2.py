@@ -1,4 +1,5 @@
 import cv2
+import score
 
 #-----Reading the image-----------------------------------------------------
 img = cv2.imread('images//all_souls_000005.jpg')
@@ -27,7 +28,7 @@ img = cv2.imread('images//all_souls_000005.jpg')
 # final = cv2.cvtColor(limg, cv2.COLOR_LAB2BGR)
 # # cv2.imshow('final', final)
 # # cv2.waitKey()
-
+d = score.ImageDivider()
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
 clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8,8))
@@ -36,6 +37,10 @@ cv2.imwrite("images//contrastgray.jpg", gray)
 cv2.imwrite("images//contrasteq.jpg", final)
 cv2.imwrite("images//contrast.jpg", cv2.hconcat([gray, final]))
 
+d.RMSContrast(gray)
+d.RMSContrast(final)
+d.MichContrast(gray)
+d.MichContrast(final)
 
 #gray2 = cv2.cvtColor(final, cv2.COLOR_BGR2GRAY)
 model = cv2.BRISK_create(20, 4)
