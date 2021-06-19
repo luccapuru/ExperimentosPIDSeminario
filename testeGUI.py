@@ -36,6 +36,8 @@ def c_open_file_old():
     print(rep2)
     img = imageio.imread(rep2)
     print(img.shape)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    print(img.shape)
     cv2.imshow("aaa", img)
     # try:
 	#     os.startfile(rep[0])
