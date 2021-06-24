@@ -65,8 +65,10 @@ class ImageDivider():
         contrast = contrastValue/contrastRef
         contrast = limit(contrast, 0, 1)
 
-        print("distribution", distribution)
-        print("qtd", qtd)
+        # print("distribution", distribution)
+        # print("qtd", qtd)
+
+        return contrast+qtd+distribution
 
     def RMSContrast(self, img):
         stdImg = np.std(img)
@@ -76,6 +78,16 @@ class ImageDivider():
         print(np.max(img), np.min(img))
         contrast = (np.max(img)-np.min(img))/(np.max(img)+np.min(img))
         print(contrast)
+    
+    def ResizeImage(self, img, scalePercent = 80, maxW = 600 , maxH = 350):
+        # width = int(img.shape[1] * scale_percent / 100)
+        # height = int(img.shape[0] * scale_percent / 100)
+        dim = (int(img.shape[1] * scalePercent / 100), int(img.shape[0] * scalePercent / 100))
+        resized = cv2.resize(img, dim, interpolation = cv2.INTER_AREA)
+        while resized.shape[1] >= maxW or resized.shape[0] > maxH:
+            dim = (int(resized.shape[1] * scalePercent / 100), int(resized.shape[0] * scalePercent / 100))
+            resized = cv2.resize(resized, dim, interpolation = cv2.INTER_AREA)
+        return resized
 
 
 def main():
