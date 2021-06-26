@@ -10,12 +10,16 @@ except ImportError:
 
 import cv2
 import imageio
+import tkcap
  
 root = tk.Tk()
 # canvas = Canvas(root, width = 300, height = 300)   
 style = ttk.Style(root)
 style.theme_use("clam")
- 
+
+def SaveScreen():
+    cap = tkcap.CAP(root)
+    cap.capture("screenshots//testeCap.jpg")
  
 def OpenImg():
     rep = filedialog.askopenfilenames(
@@ -35,5 +39,6 @@ def OpenImg():
     cv2.imshow("aaa", img)
  
 ttk.Button(root, text="Open files", command=OpenImg).grid(row=1, column=0, padx=4, pady=4, sticky='ew')
+ttk.Button(root, text="Save Screen", command=SaveScreen).grid(row=2, column=0, padx=4, pady=4, sticky='ew')
  
 root.mainloop()

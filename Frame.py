@@ -5,6 +5,11 @@ from tkinter import filedialog
 import cv2
 import imageio
 import score
+import tkcap
+from PIL import ImageGrab
+from functools import partial
+import numpy as np
+ImageGrab.grab = partial(ImageGrab.grab, all_screens=True)
 
 class FrameImage():
 
@@ -13,9 +18,13 @@ class FrameImage():
 
         #Start Interface
         self.root = tk.Tk()
+        self.root.title("Marker Score Calculator")
+        self.root.iconbitmap("images//1321.ico")
         self.panelA = None
         self.panelB = None
         self.root.minsize(600, 400)
+        self.btn3 = tk.Button(self.root, text="Save Screen", command=self.SaveScreen)
+        self.btn3.pack(side="bottom", fill="both", expand="yes", padx="10", pady="10")
         self.btn2 = tk.Button(self.root, text="Calculate Score", command=self.CalcScore)
         self.btn2.pack(side="bottom", fill="both", expand="yes", padx="10", pady="10")
         self.btn2.configure(state="disabled")
@@ -29,31 +38,40 @@ class FrameImage():
         self.text = tk.Text(self.root, state='disabled', width=44, height=5)
         self.text.pack()
 
+        self.var.set(2)
+        self.refImg, self.refTotalFeaturesORB = self.OpenImg("C:/Users/lucca/Desktop/Mestrado/Disciplinas/Processamento de Imagens Digitais/Seminário/Experimentos/images/pedras-1.jpg")
+        self.refContrast, self.refFeatureStdORB = self.CalcFeat(self.refImg) 
         #Referencias da imagem de referencia
         self.var.set(1)
-        self.refImg, self.refTotalFeatures = self.OpenImg("C:/Users/lucca/Desktop/Mestrado/Disciplinas/Processamento de Imagens Digitais/Seminário/Experimentos/images/pedras-1.jpg")
-        self.refContrast, self.refFeatureStd = self.CalcFeat(self.refImg) 
-        # self.var.set(2)
-        # self.refImg, self.refTotalFeaturesORB = self.OpenImg("C:/Users/lucca/Desktop/Mestrado/Disciplinas/Processamento de Imagens Digitais/Seminário/Experimentos/images/pedras-1.jpg")
-        # self.refContrast, self.refFeatureStdBRISK = self.CalcFeat(self.refImg) 
-
+        self.refImg, self.refTotalFeaturesBRISK = self.OpenImg("C:/Users/lucca/Desktop/Mestrado/Disciplinas/Processamento de Imagens Digitais/Seminário/Experimentos/images/pedras-1.jpg")
+        self.refContrast, self.refFeatureStdBRISK = self.CalcFeat(self.refImg) 
+        
         # self.refkps = self.LoadReference()
         self.root.mainloop()
+    
+    def SaveScreen(self):
+        cap = tkcap.CAP(self.root)
+        cap.capture("screenshots//Cap.jpg")
     
     def OpenImg(self, path):
         if len(path) > 0:
             imgCV = imageio.imread(path)
-            gray = cv2.cvtColor(imgCV, cv2.COLOR_BGR2GRAY)
-            
+            if len(imgCV.shape) > 2:
+                gray = cv2.cvtColor(imgCV, cv2.COLOR_BGR2GRAY)
+            else:
+                gray = np.copy(imgCV)
             if self.var.get() == 1:
+                # model = cv2.BRISK_create(20, 4)
                 model = cv2.BRISK_create(70, 4)
                 print("BRISK")
+                (kps, descs) = model.detectAndCompute(gray, None)
+                imgModel = cv2.drawKeypoints(imgCV, kps, None, color=(0,255,0), flags=0)
             elif self.var.get() == 2:
                 model = cv2.ORB_create(nfeatures=100000)
                 print("ORB")
-            (kps, descs) = model.detectAndCompute(gray, None)
-            imgModel = cv2.drawKeypoints(imgCV, kps, None, color=(0,255,0), flags=0)
-
+                (kps, descs) = model.detectAndCompute(gray, None)
+                imgModel = cv2.drawKeypoints(imgCV, kps, None, color=(0,0,255), flags=0)
+            
             imgTK = self.scoreMaker.ResizeImage(imgCV)
             imgModel = self.scoreMaker.ResizeImage(imgModel)
 
@@ -77,23 +95,30 @@ class FrameImage():
         return imgCV, len(kps)
 
     def CalcFeat(self, img):
-        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        if len(img.shape) > 2:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = np.copy(img)
         imgDividida = self.scoreMaker.Dividir(img, 2) #divide a imagem em 8
-        _, numberFeatures = self.scoreMaker.MultipleBrisk(imgDividida)
+        _, numberFeatures = self.scoreMaker.MultipleModel(imgDividida, self.var.get())
         featureStd = self.scoreMaker.FeatureStatistic(numberFeatures)
         contrast = self.scoreMaker.RMSContrast(gray)
         return contrast, featureStd
 
     def CalcScore(self):
         contrast, featureStd = self.CalcFeat(self.img)
-        nota = self.scoreMaker.Score(self.refFeatureStd, featureStd, self.refTotalFeatures,
+        if self.var.get() == 1:
+            nota = self.scoreMaker.Score(self.refFeatureStdBRISK, featureStd, self.refTotalFeaturesBRISK,
+                self.totalFeatures, self.refContrast, contrast)
+        elif self.var.get() == 2:
+            nota = self.scoreMaker.Score(self.refFeatureStdORB, featureStd, self.refTotalFeaturesORB,
                 self.totalFeatures, self.refContrast, contrast)
         self.text.configure(state="normal")
         self.text.delete("1.0", tk.END)
-        self.text.insert("end", "Num de features: " + str(self.totalFeatures) + "\n" +
-                                "Contraste RMS: " + str(contrast) + "\n" +
-                                "Desvio Padrão das features: " + str(featureStd) + "\n" +
-                                "Nota final: " + str(nota) + "/3.0")
+        self.text.insert("end", "Number of Features: " + str(self.totalFeatures) + "\n" +
+                                "RMS Contrast: " + "{:.4f}".format(contrast) + "\n" +
+                                "Feature Distribution: " + "{:.4f}".format(featureStd) + "\n" +
+                                "Final Score: " + "{:.2f}".format(nota) + "/3.00")
         self.text.configure(state="disabled")
         self.btn2.configure(state="disabled")
 

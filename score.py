@@ -26,11 +26,15 @@ class ImageDivider():
             cv2.imshow("i" + str(i), imgd)
             # cv2.imwrite("results//corteImagem" + str(i)+ ".jpg", imgd)
     
-    def MultipleBrisk(self, img_dividida):
-        brisk = cv2.BRISK_create(70, 4)
+    def MultipleModel(self, img_dividida, var):
+        if var == 1:
+            # model = cv2.BRISK_create(20, 4)
+            model = cv2.BRISK_create(70, 4)
+        elif var == 2:
+            model = cv2.ORB_create(nfeatures=100000)
         numberFeatures = []
         imgBrisk = []
-        result = map(lambda img: brisk.detectAndCompute(img, None), img_dividida)
+        result = map(lambda img: model.detectAndCompute(img, None), img_dividida)
         kps = [x[:][0] for x in result]
         imgBrisk = map(lambda img, kp: cv2.drawKeypoints(img, kp, None, color=(0,255,0), flags=0), img_dividida, kps)
         numberFeatures = [len(kp) for kp in kps]
@@ -47,7 +51,8 @@ class ImageDivider():
     def FeatureStatistic(self, numberFeatures):
         # featureMean = np.mean(numberFeatures)
         norm = np.linalg.norm(numberFeatures)
-        numberFeatures = numberFeatures/norm
+        print(numberFeatures)
+        numberFeatures = numberFeatures/(norm+1)
         featureStd = np.std(numberFeatures)
         return featureStd
 
