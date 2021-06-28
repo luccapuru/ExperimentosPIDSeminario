@@ -99,8 +99,9 @@ class FrameImage():
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         else:
             gray = np.copy(img)
-        imgDividida = self.scoreMaker.Dividir(img, 2) #divide a imagem em 8
-        _, numberFeatures = self.scoreMaker.MultipleModel(imgDividida, self.var.get())
+        # imgDividida = self.scoreMaker.Dividir(img, 2) #divide a imagem em 8
+        # _, numberFeatures,  = self.scoreMaker.MultipleModel(imgDividida, self.var.get())
+        numberFeatures = self.scoreMaker.FeatureDistribution(img, self.var.get())
         featureStd = self.scoreMaker.FeatureStatistic(numberFeatures)
         contrast = self.scoreMaker.RMSContrast(gray)
         return contrast, featureStd
