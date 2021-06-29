@@ -119,20 +119,24 @@ class ImageDivider():
 
     def Score(self, stdRef, stdValue, nFeatureRef, nFeature, contrastRef, contrastValue):
         #Distribuicao de Features
+        # distribution = 1 + 0.0591 - stdValue
         distribution = 1 + stdRef - stdValue
         limit = lambda n, minn, maxn: max(min(maxn, n), minn)
         distribution = limit(distribution, 0, 1)
 
         #Numero de Features 
+        # qtd = nFeature/7915
         qtd = nFeature/nFeatureRef
         qtd = limit(qtd, 0, 1)
 
         #contraste
+        # contrast = contrastValue/73.8385
         contrast = contrastValue/contrastRef
         contrast = limit(contrast, 0, 1)
 
-        # print("distribution", distribution)
-        # print("qtd", qtd)
+        print("distribution", distribution)
+        print("qtd", qtd)
+        print("contrast", contrast)
 
         return contrast+qtd+distribution
 

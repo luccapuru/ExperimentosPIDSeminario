@@ -82,7 +82,8 @@ class NonLinearFilters():
 def main():
     nlf = NonLinearFilters()
     #abrindo imagem em escala de cinza
-    img = cv2.imread("images//all_souls_000005.jpg", cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread("images//pedras-1.jpg", cv2.IMREAD_GRAYSCALE)
+    # img = cv2.imread("images//all_souls_000012.jpg", cv2.IMREAD_GRAYSCALE)
     #mostrando a imagem orginal 
     cv2.imshow("Imagem Original", img)
     imgLog = nlf.Log(img)
@@ -99,12 +100,12 @@ def main():
     cv2.imshow("Imagem - 2 passos", imgTrans)
     cv2.imshow("Imagem - Equalizacao de Histograma", imgEq)
 
-    cv2.imwrite("results//Log.jpg", imgLog)
-    cv2.imwrite("results//Exp.jpg", imgExp)
-    cv2.imwrite("results//Quad.jpg", imgQuad)
-    cv2.imwrite("results//Raiz.jpg", imgRaiz)
-    cv2.imwrite("results//EqHist.jpg", imgEq)
-    cv2.imwrite("results//TwoStep.jpg", imgTrans)
+    cv2.imwrite("results//Logped.jpg", imgLog)
+    cv2.imwrite("results//Expped.jpg", imgExp)
+    cv2.imwrite("results//Quadped.jpg", imgQuad)
+    cv2.imwrite("results//Raizped.jpg", imgRaiz)
+    cv2.imwrite("results//EqHistped.jpg", imgEq)
+    cv2.imwrite("results//TwoStepped.jpg", imgTrans)
 
     cv2.waitKey()
 
